@@ -6,19 +6,14 @@ const fs = require('fs')
 
 const app = express()
 
-app.get('/linh', (req, res) => {
-  try {
-    // res
-    //   .status(200)
-    //   .json({ message: 'ok' })
-    res.json({username: "fdsfs"})
-  } catch (error) {
-    res
-      .status(500)
-      .send(error.toString())
-  }
+const bodyParser = require('body-parser')
+
+const api = require('./routes/api')
+
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use('/api', api)
  
-})
 const options = {
   key: fs.readFileSync(__dirname + '/keys/localhost-privkey.pem'),
   cert: fs.readFileSync(__dirname + '/keys/localhost-cert.pem')
