@@ -1,54 +1,69 @@
-let todoList = [
-  {
-    "id": 1,
-    "content": "Lam toan"
-  },
-  {
-    "id": 2,
-    "content": "Lam van"
-  }
-]
+const Todo = require('../models/todo');
 
 module.exports = {
-  getTodoList: (req, res) => {
-    try {
-      return res.json(todoList)
-    } catch (error) {
-      res.json(error.message)
-    }
-  },
-  addTodo: (req, res) => {
-    try {
-      const todo = { "id": todoList.length + 1, ...req.body }
-      todoList.push(todo)
+    getTodoList: async(req, res) => {
+        try {
+            const todoList = await Todo.find({})
+            return res.json({
+                status: 200,
+                message: "Success",
+                todoList: todoList
+            })
+        } catch (error) {
+            res.json(error.message)
+        }
+    },
+    addTodo: async(req, res) => {
+        const data = {...req.body }
+        try {
+            const todo = new Todo({
+                content: data.content
+            })
+            await todo.save()
 
-      return res.json(todoList)
-    } catch (error) {
-      res.json(error.message)
-    }
-  },
-  editTodo: (req, res) => {
-    try {
-      const todoId = Number(req.params.id)
-      const todo = { ...req.body }
+            return res.json({
+                status: 200,
+                message: "Add success!",
+                todo: todo
+            })
+        } catch (error) {
+            res.json(error.message)
+        }
+    },
+    editTodo: async(req, res) => {
+        const todoId = req.params.id
+        const data = {...req.body }
+        try {
+            const todo = await Todo.findOneAndUpdate({ _id: todoId }, { content: data.content }, { new: true })
 
-      todoIndex = todoList.findIndex(todo => todo.id === todoId)
-      todoList[todoIndex].content = todo.content
+            if (!todo) {
+                return res.json('You dont have this todo item or todo item not exist!')
+            }
 
-      return res.json(todoList)
-    } catch (error) {
-      res.json(error.message)
-    }
-  },
-  deleteTodo: (req, res) => {
-    try {
-      const todoId = Number(req.params.id)
+            return res.json({
+                status: 200,
+                message: "Edit success!",
+                todo: todo
+            })
+        } catch (error) {
+            res.json(error.message)
+        }
+    },
+    deleteTodo: async(req, res) => {
+        const todoId = req.params.id
+        try {
+            const todo = await Todo.findOneAndRemove({ _id: todoId })
 
-      todoList = todoList.filter( todo => todo.id !== todoId )
-      
-      return res.json(todoList)
-    } catch (error) {
-      res.json(error.message)
-    }
-  },
+            if (!todo) {
+                return res.json('You dont have this todo item or todo item not exist!')
+            }
+
+            return res.json({
+                status: 200,
+                message: "Delete success!"
+            })
+        } catch (error) {
+            res.json(error.message)
+        }
+    },
 };
