@@ -1,21 +1,24 @@
-const port = 8443
 const spdy = require('spdy')
 const express = require('express')
 const mongoose = require('mongoose')
-const path = require('path')
 const fs = require('fs')
-
+const cors = require('cors')
+const config = require('./config')
+const port = config.port
 const app = express()
 
 const bodyParser = require('body-parser')
 
 const api = require('./routes/api')
 
+const dbUrl = `mongodb://${config.mongodb.host}:${config.mongodb.port}/${config.mongodb.database}`
+console.log(dbUrl)
 mongoose.connect(
-    'mongodb://localhost:27017/todo', { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false },
+    dbUrl, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false },
     () => console.log('db connected')
 )
 
+app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use('/api', api)
